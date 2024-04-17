@@ -2,6 +2,9 @@
 <launch>
 
 <node name="sonar" pkg="amr_ros" type="sonar" output="screen">
+    <param name="sonar_left_en" value="false"/>
+    <param name="sonar_center_en" value="false"/>
+    <param name="sonar_right_en" value="true"/>
 </node>
 
 <!--
