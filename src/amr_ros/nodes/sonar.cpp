@@ -25,7 +25,7 @@
                       /*L   C   R*/
 const int trig_pin[] = {4, 2, 0};
 const int echo_pin[] = {5, 3, 1};
-const bool sonar_en[] = {false, true, false};
+bool sonar_en[] = {false, false, false};
 
 #define STATE_NOT_SEND             0
 #define STATE_KEEP_TRIG_HIGH       1
@@ -79,7 +79,6 @@ int check_sonar()
                 digitalWrite(trig_pin[i], HIGH);
                 sonar_obst[i].send_start_time = ros::Time::now().toNSec();
                 sonar_obst[i].state = STATE_KEEP_TRIG_HIGH;
-                // ROS_INFO("Sonar_%d, State 0: send out",i);
                 break;
             case STATE_KEEP_TRIG_HIGH:
                 if(ros::Time::now().toNSec() - sonar_obst[i].send_start_time > KEEP_ON_10_USEC)
@@ -87,7 +86,6 @@ int check_sonar()
                     digitalWrite(trig_pin[i], LOW);
                     sonar_obst[i].send_complete_time = ros::Time::now().toNSec();
                     sonar_obst[i].state = STATE_WAIT_RESP;
-                    // ROS_INFO("Sonar_%d, STATE 1: send complete",i);
                 }
                 break;
             case STATE_WAIT_RESP:
@@ -98,7 +96,6 @@ int check_sonar()
                         //wait response timeout, set range = +Inf
                         sonar_obst[i].msg.range =  INFINITY;
                         sonar_obst[i].state = STATE_PUBLISH_DISTANCE;
-                        // ROS_INFO("Sonar_%d, State 2:wait Timeout!",i);
                     }
                 }
                 else //low => high
@@ -115,19 +112,31 @@ int check_sonar()
                     //calculate distance
                     sonar_obst[i].msg.range = (SOUND_SPEED_METER_PER_SEC * (ros::Time::now().toNSec() - sonar_obst[i].resp_start_time)/1000000000) / 2;
                     sonar_obst[i].state = STATE_PUBLISH_DISTANCE;
-                    // ROS_INFO("Sonar_%d, STATE 3: wait resp complete",i);
                 }
                 break;
             case STATE_PUBLISH_DISTANCE:
                 sonar_obst[i].msg.header.stamp = ros::Time::now();
                 sonar_obst[i].dist_pub.publish(sonar_obst[i].msg);
                 sonar_obst[i].state = STATE_COMPlETE;
-                // ROS_INFO("Sonar_%d, STATE 4: published distance",i);
-                ROS_INFO("Sonar_%d, distance=%f", i, sonar_obst[i].msg.range);
+                if(i == SONAR_LEFT)
+                {
+                    ROS_INFO("Sonar_left, distance=%.3f", sonar_obst[i].msg.range);
+                }
+                else if(i == SONAR_CENTER)
+                {
+                    ROS_INFO("Sonar_center, distance=%.3f", sonar_obst[i].msg.range);
+                }
+                else if(i == SONAR_RIGHT)
+                {
+                    ROS_INFO("Sonar_right, distance=%.3f", sonar_obst[i].msg.range);
+                }
+                else
+                {
+                    ROS_INFO("Sonar unknown, distance=%.3f", sonar_obst[i].msg.range);
+                }
                 break;
             case STATE_COMPlETE:
                 sonar_obst[i].state = STATE_NOT_SEND;
-                // ROS_INFO("Sonar_%d, STATE 5: check sonar complete",i);
                 break;
             default:
                 sonar_obst[i].state = STATE_NOT_SEND;
@@ -149,7 +158,11 @@ int check_sonar()
 int main(int argc, char **argv)
 {
   ros::init(argc, argv, "sonar");
-  ros::NodeHandle nh;
+  ros::NodeHandle nh("~");
+
+  nh.getParam("sonar_left_en",sonar_en[SONAR_LEFT]);
+  nh.getParam("sonar_center_en",sonar_en[SONAR_CENTER]);
+  nh.getParam("sonar_right_en",sonar_en[SONAR_RIGHT]);
 
   //Init sonar gpio
   if(wiringPiSetup() == -1)
