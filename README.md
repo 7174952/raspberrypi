@@ -2,20 +2,31 @@
 save raspberrypi source code
 
 ■ ラズパイ4B
+
 C/C++開発lib: wiringPi V2.61
+
 ・ソースコード：https://github.com/WiringPi/WiringPi
+
 ・リリース版：https://github.com/WiringPi/WiringPi/releases/tag/2.61-1　※
 
 wiringpi-2.61-1-arm64.deb 
+
 The tool gpio can be used to set single pins as well as get the state of everything at once:
 
 pi@wiringdemo:~ $ gpio readall
+
  +-----+-----+---------+------+---+---Pi 3B--+---+------+---------+-----+-----+
+ 
  | BCM | wPi |   Name  | Mode | V | Physical | V | Mode | Name    | wPi | BCM |
+ 
  +-----+-----+---------+------+---+----++----+---+------+---------+-----+-----+
+ 
  |     |     |    3.3v |      |   |  1 || 2  |   |      | 5v      |     |     |
+ 
  |   2 |   8 |   SDA.1 |   IN | 1 |  3 || 4  |   |      | 5v      |     |     |
+ 
  |   3 |   9 |   SCL.1 |   IN | 1 |  5 || 6  |   |      | 0v      |     |     |
+ 
  |   4 |   7 | GPIO. 7 |   IN | 0 |  7 || 8  | 0 | IN   | TxD     | 15  | 14  |
  |     |     |      0v |      |   |  9 || 10 | 1 | IN   | RxD     | 16  | 15  |
  |  17 |   0 | GPIO. 0 |   IN | 1 | 11 || 12 | 1 | IN   | GPIO. 1 | 1   | 18  |
